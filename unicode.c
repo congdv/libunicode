@@ -10,16 +10,25 @@ character
     V    >
     [0x41(a)][0x00EA(e^)]
     When read each element and write out screen
+    UTF-8 Table
+    With UTF-8 first byte present number of bytes when read bit 1 on first
+    Bits of code point | First cp| Last cp | Bytes | Byte 1  | Byte 2  | Byte 3  | Byte 4  |
+            7          | 0x0000  | 0x007F  | 1     |0xxxxxxxx|
+           11          | 0x0080  | 0x07FF  | 2(110)|110xxxxxx|10xxxxxxx|
+           16          | 0x0800  | 0xFFFF  | 3     |1110xxxxx|10xxxxxxx|10xxxxxxx|
+           21          | 0x10000 | 0x1FFFFF| 4     |11110xxxx|10xxxxxxx|10xxxxxxx|10xxxxxxx|
    ============================================================ */
+#include "unicode.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-typedef struct achar {
+struct achar {
     char *bytes;
     int length;
-} achar;
+};
 
 struct alchars {
     achar **chars;
@@ -31,10 +40,14 @@ typedef struct abuf {
     int len;
 } abuf;
 
-#define DATABUFFER_INIT {NULL,0}
 
-/*Encode Utf-8*/
-achar *encode( unsigned codePoint) {
+#define INIT {NULL,0}
+
+abuf ab = INIT;
+
+
+/*Decode Utf-8*/
+achar *decode( unsigned codePoint) {
     achar *chars = malloc(sizeof(achar));
 
     if(codePoint < 0x80) {
@@ -63,22 +76,57 @@ achar *encode( unsigned codePoint) {
         chars->bytes = buf;
         chars->length = 4;
     } else {
-        fprintf(stderr,"Error");
+        chars->bytes = NULL;
+        chars->length = 0;
     }
     return chars;
 }
 
-void appendAChar(struct alchars *alc,unsigned c){
+/*From bytes with utf-8 format will be */
+void encode(struct alchars *alc,const char *s, int numByte) { 
+    /*When enter a string contain utf-8 char
+     * This char will be 8 byte but last byte contain data
+     * What you need to encode become utf-8
+     * So need & 0xff to get last byte*/
+    for(int i = 0; i < numByte; i++) {
+        if((unsigned char)s[i] < 0x80) {
+            appendNewChar(alc,s[i]);
+        } else if((s[i]&0xff) < 0xE0) {
+            /*Do encode*/
+            /*Check next byte is valid*/
+            if(i+1 < numByte && ((s[i+1]&0xff) & 0xC0) == 0x80) {
+                appendNewChar(alc,((s[i]&0xff) << 6) + (s[i+1] & 0xff) - 0x3080);
+                i++;
+            }
+        } else if((s[i]&0xff) < 0xF0) {
+            if(i + 1 < numByte && i + 2 < numByte) {
+                appendNewChar(alc,((s[i]&0xff) << 12) + ((s[i+1]&0xff) << 6) + (s[i+2]&0xff) - 0xE2080);
+                i+=2;
+            }
+        }else if((s[i] & 0xff) < 0xF5) {
+            if(i + 1 < numByte && i + 2 < numByte && i+3 < numByte) {
+                appendNewChar(alc,((s[i] & 0xff) << 18 )+ ((s[i+1] & 0xff) << 12) + ((s[i+2] & 0xff) << 6) + (s[i+3] & 0xff) - 0x3C82080);
+                i+=3;
+            }
+        }
+    }
+}
+
+/* Append a utf-8 char*/
+void appendNewChar(struct alchars *alc,unsigned c){
     achar **newAlloc = realloc(alc->chars, (alc->length + 1)*sizeof(achar *));
     if(newAlloc == NULL)
        return;
 
-    newAlloc[alc->length] = encode(c);
+    newAlloc[alc->length] = decode(c);
     alc->length++;
     alc->chars = newAlloc;
 }
 
+
+/* Append to struct for store string*/
 void abAppend(abuf *ab, char *s, int len) {
+    // Add Null char
     char *new = realloc(ab->s,ab->len + len);
     if(new == NULL)
         return;
@@ -87,23 +135,61 @@ void abAppend(abuf *ab, char *s, int len) {
     ab->len += len;
 }
 
-void convertToAbbuf(struct alchars *alc, abuf *ab) {
-    achar ** chars = alc->chars;
-    for(int i = 0; i < alc->length; i++) {
-        abAppend(ab,chars[i]->bytes,chars[i]->length);
-    }
+void abFree(abuf *ab) {
+    if(ab != NULL && ab->len > 0)
+        free(ab->s);
 }
 
-int main() {
-    struct alchars alc = DATABUFFER_INIT;
-    for(int i = 0; i < 100; i++) {
-        appendAChar(&alc,'a');
-        appendAChar(&alc,0x00EA);
-        appendAChar(&alc,0x00EA);
+alchars newChar(void) {
+    alchars alc = malloc(sizeof(struct alchars));
+    alc->chars = NULL;
+    alc->length = 0;
+    return alc;
+}
+/* Create new char*/
+alchars createNewChar(unsigned c) {
+    alchars alc = malloc(sizeof(struct alchars));
+    alc->length = 0;
+    alc->chars = NULL;
+    appendNewChar(alc,c);
+    return alc;
+}
+/* Free chars*/
+void freeChars(alchars *alc) {
+    achar ** chars = (*alc)->chars;
+    for(int i = 0; i < (*alc)->length; i++) {
+        if(chars[i]) {
+            free(chars[i]->bytes);
+            free(chars[i]);
+        }
     }
+    free(chars);
+    free(*alc);
+    abFree(&ab);
+}
 
-    abuf ab = DATABUFFER_INIT;
-    convertToAbbuf(&alc,&ab);
-    write(STDOUT_FILENO,ab.s,ab.len);
-    return 0;
+/* Get string */
+const char *getStringPointer(alchars alc) {
+    achar ** chars = alc->chars;
+    for(int i = 0; i < alc->length; i++) {
+        abAppend(&ab,chars[i]->bytes,chars[i]->length);
+    }
+    char *new = realloc(ab.s,ab.len + 1);
+    new[ab.len] = '\0';
+    ab.s = new;
+
+    return ab.s;
+}
+
+
+int getStringLen(const char *s) {
+    struct alchars *alc = newChar();
+    encode(alc,s,strlen(s));
+    int len = alc->length;
+    freeChars(&alc);
+    return len; 
+}
+/* Add new string */
+void appendNewString(alchars alc,const char *s) {
+    encode(alc,s,strlen(s));
 }
