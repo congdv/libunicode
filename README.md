@@ -14,12 +14,19 @@ I create a list memory like a list bucket, with a bucket will contain raw bytes 
 
 ```
 alchar alc = newChar(); /*Initalize for store buckets*/
+
 alchar alcnl = createNewChar('x'); /*Initalize for store buckets with first bucket*/
+
 appendNewChar(alc,'x'); /* Add new character*/
+
 appendNewString(alc,"in chào"); /*Add new string*/
+
 printf("%s",getStringPointer(alc));/*Get string from all buckets to print*/
+
 int getLen(alc); /* Get length of buckets */
+
 int len = getStringLen("Xin Chào");/*Count number of character from string*/
+
 freeChars(&alc); /*Free buckets*/
 ```
 
