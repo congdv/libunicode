@@ -15,11 +15,12 @@ int main() {
 
     printf("\n");
 
-    const char *s = "dạy nhau học";
+    const char *s = "Xin chào thế giới";
     appendNewString(alc,s);
     int len = getStringLen(s);
     printf("Len bytes: %d\n",len);
-    printf("%s",getStringPointer(alc));
+    printf("Len bytes: %d\n",getLen(alc));
+    printf("%s\n",getStringPointer(alc));
 
     freeChars(&alc);
     return 0;

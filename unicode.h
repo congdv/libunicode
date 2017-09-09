@@ -27,4 +27,7 @@ const char *getStringPointer(alchars alc);
 /* Get string length*/
 int getStringLen(const char *s);
 
+/* Get length buckets*/
+int getLen(alchars alc);
+
 #endif // End UNICODE_H

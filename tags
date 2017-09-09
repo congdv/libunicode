@@ -36,6 +36,7 @@ disableRawMode	test_utf_8.c	/^void disableRawMode() {$/;"	f
 enableRawMode	test_utf_8.c	/^void enableRawMode() {$/;"	f
 encode	unicode.c	/^void encode(struct alchars *alc,const char *s, int numByte) { $/;"	f
 freeChars	unicode.c	/^void freeChars(alchars *alc) {$/;"	f
+getLen	unicode.c	/^int getLen(alchars alc) {$/;"	f
 getStringLen	unicode.c	/^int getStringLen(const char *s) {$/;"	f
 getStringPointer	unicode.c	/^const char *getStringPointer(alchars alc) {$/;"	f
 isValidChangeChars	test_utf_8.c	/^int isValidChangeChars(struct abuf *ab, int c) {$/;"	f

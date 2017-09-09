@@ -189,6 +189,9 @@ int getStringLen(const char *s) {
     freeChars(&alc);
     return len; 
 }
+int getLen(alchars alc) {
+    return alc->length;
+}
 /* Add new string */
 void appendNewString(alchars alc,const char *s) {
     encode(alc,s,strlen(s));
