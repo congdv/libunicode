@@ -24,26 +24,23 @@ character
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 
-struct achar {
-    char *bytes;
-    int length;
-};
 
 struct alchars {
     achar **chars;
     int length;
 };
 
-typedef struct abuf {
+typedef struct buffers {
     char *s;
     int len;
-} abuf;
+} buffers;
 
 
 #define INIT {NULL,0}
 
-abuf ab = INIT;
+buffers bf = INIT;
 
 
 /*Decode Utf-8*/
@@ -125,19 +122,19 @@ void appendNewChar(struct alchars *alc,unsigned c){
 
 
 /* Append to struct for store string*/
-void abAppend(abuf *ab, char *s, int len) {
+void bufAppend(buffers *buf, char *s, int len) {
     // Add Null char
-    char *new = realloc(ab->s,ab->len + len);
+    char *new = realloc(buf->s,buf->len + len);
     if(new == NULL)
         return;
-    memcpy(&new[ab->len],s,len);
-    ab->s = new;
-    ab->len += len;
+    memcpy(&new[buf->len],s,len);
+    buf->s = new;
+    buf->len += len;
 }
 
-void abFree(abuf *ab) {
-    if(ab != NULL && ab->len > 0)
-        free(ab->s);
+void bufFree(buffers *buf) {
+    if(buf != NULL && buf->len > 0)
+        free(buf->s);
 }
 
 alchars newChar(void) {
@@ -165,20 +162,20 @@ void freeChars(alchars *alc) {
     }
     free(chars);
     free(*alc);
-    abFree(&ab);
+    bufFree(&bf);
 }
 
 /* Get string */
 const char *getStringPointer(alchars alc) {
     achar ** chars = alc->chars;
     for(int i = 0; i < alc->length; i++) {
-        abAppend(&ab,chars[i]->bytes,chars[i]->length);
+        bufAppend(&bf,chars[i]->bytes,chars[i]->length);
     }
-    char *new = realloc(ab.s,ab.len + 1);
-    new[ab.len] = '\0';
-    ab.s = new;
+    char *new = realloc(bf.s,bf.len + 1);
+    new[bf.len] = '\0';
+    bf.s = new;
 
-    return ab.s;
+    return bf.s;
 }
 
 
@@ -195,4 +192,10 @@ int getLen(alchars alc) {
 /* Add new string */
 void appendNewString(alchars alc,const char *s) {
     encode(alc,s,strlen(s));
+}
+achar *getBucketAt(alchars alc,int index) {
+    if(index < 0 && index >= alc->length)
+        return NULL;
+    // Get value of bucket
+    return alc->chars[index];
 }

@@ -8,6 +8,11 @@
 #define UNICODE_H
 
 typedef struct achar achar;
+struct achar {
+    char *bytes;
+    int length;
+};
+
 typedef struct alchars *alchars; // Definition to itselft
 
 alchars newChar();
@@ -29,5 +34,8 @@ int getStringLen(const char *s);
 
 /* Get length buckets*/
 int getLen(alchars alc);
+
+/* Get string value of bucket at index*/
+achar *getBucketAt(alchars alc,int index);
 
 #endif // End UNICODE_H
