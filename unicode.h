@@ -20,6 +20,8 @@ alchars newChar();
 alchars createNewChar(unsigned c);
 /* Add new char*/
 void appendNewChar(alchars alc,unsigned c);
+
+void insertChar(alchars alc, int at,unsigned c);
 /* Add new string */
 void appendNewString(alchars alc,const char *s);
 
@@ -37,5 +39,6 @@ int getLen(alchars alc);
 
 /* Get string value of bucket at index*/
 achar *getBucketAt(alchars alc,int index);
+
 
 #endif // End UNICODE_H

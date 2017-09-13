@@ -42,14 +42,7 @@ typedef struct buffers {
 
 buffers bf = INIT;
 
-void refreshBuffers() {
-    if(bf.s != NULL)  {
-        free(bf.s);
-        bf.s = NULL;
-        bf.len = 0;
-    }
-    
-}
+
 /*Decode Utf-8*/
 achar *decode( unsigned codePoint) {
     achar *chars = malloc(sizeof(achar));
@@ -174,7 +167,6 @@ void freeChars(alchars *alc) {
 
 /* Get string */
 const char *getStringPointer(alchars alc) {
-    refreshBuffers();
     achar ** chars = alc->chars;
     for(int i = 0; i < alc->length; i++) {
         bufAppend(&bf,chars[i]->bytes,chars[i]->length);
@@ -189,7 +181,7 @@ int getStringLen(const char *s) {
     encode(alc,s,strlen(s));
     int len = alc->length;
     freeChars(&alc);
-    return len;
+    return len; 
 }
 int getLen(alchars alc) {
     return alc->length;
@@ -206,7 +198,7 @@ achar *getBucketAt(alchars alc,int index) {
 }
 
 void insertChar(alchars alc, int at,unsigned c) {
-    if(at < 0 && at > alc->length)
+    if(at < 0 && at > alc->length) 
         return;
     // Extend 1 bucket
     alc->chars  = realloc(alc->chars, (alc->length + 1)*sizeof(achar *));

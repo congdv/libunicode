@@ -4,6 +4,9 @@
    *Creator : @congdv
    *Description : Do test driven
    ============================================================ */
+
+/* TODOS:- Write test case
+ *       - Check dupplicate string*/
 #include "unicode.h"
 
 #include <stdio.h>
@@ -13,21 +16,15 @@
 
 int main() {
     alchars alc = newChar();
-
-    printf("\n");
-
     const char *s = "Xin chào thế giới";
     appendNewString(alc,s);
-    appendNewString(alc,"");
-    int len = getStringLen(s);
-    printf("Len bytes: %d\n",len);
-    printf("Len bytes: %d\n",getLen(alc));
+    printf("Len %d\n",getLen(alc));
     printf("%s\n",getStringPointer(alc));
-
-    printf("The seventh char is:\n ");
-    achar *c = getBucketAt(alc,6);
-    write(STDOUT_FILENO,c->bytes,c->length);
-
+    insertChar(alc,1,'b');
+    achar *ac = getBucketAt(alc,1);
+    write(STDOUT_FILENO,ac->bytes,ac->length);
+    printf("Len %d\n",getLen(alc));
+    printf("%s\n",getStringPointer(alc));
     freeChars(&alc);
     return 0;
 }
