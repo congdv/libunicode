@@ -209,7 +209,7 @@ void insertChar(alchars alc, int at,unsigned c) {
     if(at < 0 && at > alc->length)
         return;
     // Extend 1 bucket
-    alc->chars  = realloc(alc->chars, (alc->length + 1)*sizeof(achar *));
+    alc->chars  = realloc(alc->chars, (alc->length + 1)*(sizeof(achar *)));
     
     // Shift right bytes pointer to 
     for(int i = alc->length; i > at; i--) {
@@ -220,4 +220,22 @@ void insertChar(alchars alc, int at,unsigned c) {
     alc->chars[at] = decode(c);
     alc->length++;
 
+}
+
+
+void deleteBucketAt(alchars alc, int index) {
+    if(index < 0 && index >= alc->length) 
+        return;
+
+    achar *ac = alc->chars[index]; 
+
+    // Shift left bytes pointer to 
+    for(int i = index; i < alc->length - 1; i++) {
+       alc->chars[i] = alc->chars[i+1]; 
+    }
+
+    // Free bucket index
+    free(ac->bytes);
+    free(ac);
+    alc->length--;
 }

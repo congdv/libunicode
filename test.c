@@ -6,7 +6,7 @@
    ============================================================ */
 
 /* TODOS:- Write test case
- *       - Check dupplicate string*/
+ *       - Write delete char*/
 #include "unicode.h"
 
 #include <stdio.h>
@@ -25,6 +25,8 @@ int main() {
     write(STDOUT_FILENO,ac->bytes,ac->length);
     printf("Len %d\n",getLen(alc));
     printf("%s\n",getStringPointer(alc));
+    deleteBucketAt(alc,0);
+    printf("After delete: %s\n",getStringPointer(alc));
     freeChars(&alc);
     return 0;
 }

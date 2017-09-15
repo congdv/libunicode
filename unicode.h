@@ -40,5 +40,8 @@ int getLen(alchars alc);
 /* Get string value of bucket at index*/
 achar *getBucketAt(alchars alc,int index);
 
+/* Delete a bucket at index*/
+void deleteBucketAt(alchars alc, int index);
+
 
 #endif // End UNICODE_H
