@@ -27,6 +27,11 @@ int getLen(alc); /* Get length of buckets */
 
 int len = getStringLen("Xin Chào");/*Count number of character from string*/
 
+insertChar(alc,0,'b'); /*Insert at 0 with char 'b'*/
+achar *ac = getBucketAt(alc,0);  /* Get string value of bucket at index*/
+
+deleteBucketAt(alc,0); /* Delete a bucket at index*/
+
 freeChars(&alc); /*Free buckets*/
 ```
 
