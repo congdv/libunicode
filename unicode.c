@@ -158,8 +158,8 @@ alchars createNewChar(unsigned c) {
     appendNewChar(alc,c);
     return alc;
 }
-/* Free chars*/
-void freeChars(alchars *alc) {
+
+void freeAlchars(alchars *alc) {
     achar ** chars = (*alc)->chars;
     for(int i = 0; i < (*alc)->length; i++) {
         if(chars[i]) {
@@ -169,6 +169,10 @@ void freeChars(alchars *alc) {
     }
     free(chars);
     free(*alc);
+}
+/* Free chars*/
+void freeChars(alchars *alc) {
+    freeAlchars(alc);
     bufFree(&bf);
 }
 
@@ -185,10 +189,10 @@ const char *getStringPointer(alchars alc) {
 
 
 int getStringLen(const char *s) {
-    struct alchars *alc = newChar();
+    alchars alc = newChar();
     encode(alc,s,strlen(s));
     int len = alc->length;
-    freeChars(&alc);
+    freeAlchars(&alc);
     return len;
 }
 int getLen(alchars alc) {
